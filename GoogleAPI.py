@@ -1,17 +1,16 @@
 from flask import Flask, redirect, session ,url_for
 from authlib.integrations.flask_client import OAuth
 import os
+from datetime import timedelta
 
-
-app = flask(__name__)
-
-@app.route('/')
-def home():
-	email=dict(session).get('email',None)
-	return f'hello,{email}!'
+app =Flask(__name__)
+app.secret_key = 'snd.[fsd]f'
+app.config['SESSION_COKIE_NAME']='login-session'
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=5)
 
 # oAuth Setup
 oauth = OAuth(app)
+
 google = oauth.register(
     name='google',
     client_id=os.getenv("386408878883-elq0l3me8mknn8c5b8igqkd4o80urpnc.apps.googleusercontent.com"),
@@ -25,10 +24,15 @@ google = oauth.register(
     client_kwargs={'scope': 'openid email profile'},
 )
 
+@app.route('/')
+def home():
+	email=dict(session).get('email',None)
+	return f'hello,{email}!'
+
 @app.route('/login')
 def login():
     google = oauth.create_client('google')  # create the google oauth client
-    redirect_uri = url_for('authorize', _external=True) #
+    redirect_uri = url_for('autherize', _external=True) #
     return google.authorize_redirect(redirect_uri)
 
 @app.route('/autherize')
@@ -45,3 +49,6 @@ def logout():
 	for key in list(session.keys()):
 		session.pop(key)
 	return redirect('/')
+	
+if __name__ == '__main__':
+     app.run()
