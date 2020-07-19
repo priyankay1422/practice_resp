@@ -13,9 +13,10 @@ oauth = OAuth(app)
 
 google = oauth.register(
     name='google',
-    client_id=os.getenv("386408878883-elq0l3me8mknn8c5b8igqkd4o80urpnc.apps.googleusercontent.com"),
-    client_secret=os.getenv("7pvtWfb35Ef5NDffY_v8vRdg"),
+    client_id="386408878883-elq0l3me8mknn8c5b8igqkd4o80urpnc.apps.googleusercontent.com",
+    client_secret= "7pvtWfb35Ef5NDffY_v8vRdg",
     access_token_url='https://accounts.google.com/o/oauth2/token',
+    #access_token_url='https://oauth2.googleapis.com/token',
     access_token_params=None,
     authorize_url='https://accounts.google.com/o/oauth2/auth',
     authorize_params=None,
@@ -32,16 +33,18 @@ def home():
 @app.route('/login')
 def login():
     google = oauth.create_client('google')  # create the google oauth client
-    redirect_uri = url_for('autherize', _external=True) #
+    redirect_uri = url_for('authorize', _external=True) #
     return google.authorize_redirect(redirect_uri)
 
-@app.route('/autherize')
-def autherize():
-	google=aouth.create_client('google')
-	token=google.autherize_access_token()
-	resp=google.get('userinfo')
+@app.route('/authorize')
+def authorize():
+	google=oauth.create_client('google')
+	token=google.authorize_access_token()
+	resp=google.get('userinfo',token = token)
 	user_info=resp.json()
+	user = oauth.google.userinfo()
 	session['email']=user_info['email']
+	session.permanent = True
 	return redirect('/') 
 
 @app.route('/logout')
