@@ -1,10 +1,13 @@
 from flask import Flask, redirect, session ,url_for
 from authlib.integrations.flask_client import OAuth
+from decouple import config
+import locale
 import os
 from datetime import timedelta
 
+config.encoding= locale.getpreferredencoding(False)
 app =Flask(__name__)
-app.secret_key = 'snd.[fsd]f'
+app.secret_key = config('SECRET_KEY', default = '')
 app.config['SESSION_COKIE_NAME']='login-session'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=5)
 
@@ -13,8 +16,8 @@ oauth = OAuth(app)
 
 google = oauth.register(
     name='google',
-    client_id="386408878883-elq0l3me8mknn8c5b8igqkd4o80urpnc.apps.googleusercontent.com",
-    client_secret= "7pvtWfb35Ef5NDffY_v8vRdg",
+    client_id = config('GOOGLE_CLIENT_ID', default = ''),
+    client_secret= config('GOOGLE_CLIENT_SECRET', default = None),
     access_token_url='https://accounts.google.com/o/oauth2/token',
     #access_token_url='https://oauth2.googleapis.com/token',
     access_token_params=None,
@@ -45,13 +48,17 @@ def authorize():
 	user = oauth.google.userinfo()
 	session['email']=user_info['email']
 	session.permanent = True
-	return redirect('/') 
+	return user_info
 
 @app.route('/logout')
 def logout():
 	for key in list(session.keys()):
 		session.pop(key)
 	return redirect('/')
+	
+@app.route('/responce')
+def response():
+        return resp.json()
 	
 if __name__ == '__main__':
      app.run()
